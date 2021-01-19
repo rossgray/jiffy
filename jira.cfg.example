@@ -1,0 +1,6 @@
+[JIRA]
+USERNAME = ''
+PASSWORD = ''
+URL = 'https://<domain>.atlassian.net'
+DEFAULT_PROJECT = ''
+DEFAULT_TEAM = ''
