@@ -14,14 +14,35 @@ def issues():
 
 @issues.command()
 def list():
-    click.echo('Listing issues assigned to you...\n')
+    click.echo('Listing current issues assigned to you...\n')
     jira = get_jira_client()
     project = JIRA_CONFIG['DEFAULT_PROJECT']
     for issue in jira.search_issues(
-        f'assignee = currentUser() and project={project} order by created desc',
-        maxResults=10,
+        f'''assignee = currentUser()
+        AND project={project}
+        AND issueType != Sub-task
+        AND (
+            (
+                resolution = Unresolved
+                AND
+                status != Backlog
+            )
+            OR (
+                resolution = Resolved
+                AND resolution changed to Resolved after startofday(-5)
+            )
+        )
+        ORDER BY status
+        ''',
+        maxResults=20,
     ):
-        print('{}: {}'.format(issue.key, issue.fields.summary))
+        print(
+            '{}: {}: {}'.format(
+                issue.fields.status,
+                issue.key,
+                issue.fields.summary,
+            )
+        )
 
 
 if __name__ == '__main__':
