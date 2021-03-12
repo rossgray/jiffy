@@ -8,6 +8,8 @@ authors = ["Ross Gray <rossagray@gmail.com>"]
 python = "^3.9"
 jira = "^2.0.0"
 click = "^7.1.2"
+PyInquirer = "^1.0.3"
+rich = "^9.13.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
