@@ -7,7 +7,7 @@ config.read('jira.cfg')
 JIRA_CONFIG = config['JIRA']
 
 
-def get_jira_client():
+def get_jira_client() -> JIRA:
     return JIRA(
         basic_auth=(JIRA_CONFIG['USERNAME'], JIRA_CONFIG['PASSWORD']),
         options={'server': JIRA_CONFIG['URL']},

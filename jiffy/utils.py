@@ -3,13 +3,6 @@ import jira
 from rich import print
 from rich.table import Table
 
-from client import JIRA_CONFIG
-
-
-def get_issue_url(issue: jira.Issue) -> str:
-    jira_url = JIRA_CONFIG['URL']
-    return f'{jira_url}/browse/{issue.key}'
-
 
 def get_issue_str(issue: jira.Issue) -> str:
     return '{}: {}: {}'.format(
@@ -35,14 +28,14 @@ def print_issue(issue: jira.Issue) -> None:
     grid.add_row("", "")  # probably better way to add padding than this
     grid.add_row("[bold magenta]Key", issue.key)
     grid.add_row("[bold magenta]Summary", issue.fields.summary)
-    grid.add_row("[bold magenta]URL", get_issue_url(issue))
+    grid.add_row("[bold magenta]URL", issue.permalink())
     grid.add_row("[bold magenta]Issue type", issue.fields.issuetype.name)
     grid.add_row("[bold magenta]Status", issue.fields.status.name)
     if issue.fields.issuetype.subtask is False:
-        time_estimate = format_time(issue.fields.aggregatetimeestimate or 0)
+        time_remaining = format_time(issue.fields.aggregatetimeestimate or 0)
         grid.add_row(
-            "[bold magenta]Total time estimate (including subtasks)",
-            time_estimate,
+            "[bold magenta]Total time remaining (including subtasks)",
+            time_remaining,
         )
         time_spent = format_time(issue.fields.aggregatetimespent or 0)
         grid.add_row(

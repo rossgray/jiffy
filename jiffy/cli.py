@@ -7,6 +7,9 @@ from PyInquirer import prompt
 from client import JIRA_CONFIG, get_jira_client
 from utils import print_issue, get_issue_str
 
+jira_client = get_jira_client()
+project = JIRA_CONFIG['DEFAULT_PROJECT']
+
 
 @click.group()
 def cli():
@@ -16,9 +19,7 @@ def cli():
 @cli.command()
 def issues():
     click.echo('Listing current issues assigned to you...\n')
-    client = get_jira_client()
-    project = JIRA_CONFIG['DEFAULT_PROJECT']
-    issues = client.search_issues(
+    issues = jira_client.search_issues(
         f'''assignee = currentUser()
         AND project={project}
         AND issueType != Sub-task
@@ -59,6 +60,7 @@ def issues():
 
 
 def process_issue_actions(issue: jira.Issue):
+
     actions = []
     if issue.fields.subtasks:
         actions.append({'name': 'Show subtasks', 'value': 'show_subtasks'})
@@ -141,6 +143,10 @@ def process_subtask_actions(subtask: jira.Issue):
 
 
 def handle_action(action: str, issue: jira.Issue) -> str:
+
+    # First make sure issue is up-to-date
+    issue = jira_client.issue(issue.key)
+
     if action == 'show_subtasks':
         subtasks = issue.fields.subtasks
         questions = [
@@ -162,7 +168,7 @@ def handle_action(action: str, issue: jira.Issue) -> str:
         action = process_subtask_actions(subtask)
         return action
     elif action == 'status':
-        transitions = jira.transitions(issue)
+        transitions = jira_client.transitions(issue)
         pprint([(t['id'], t['name']) for t in transitions])
 
         questions = [
@@ -181,9 +187,18 @@ def handle_action(action: str, issue: jira.Issue) -> str:
         ]
         answers = prompt(questions)
         transition_id = answers['transition']
-        jira.transition_issue(issue, transition_id)
+        jira_client.transition_issue(issue, transition_id)
     elif action == 'logtime':
-        pass
+        questions = [
+            {
+                'type': 'input',
+                'name': 'logtime_amount',
+                'message': 'How much time do you want to log?',
+            },
+        ]
+        answers = prompt(questions)
+        time_spent = answers['logtime_amount']
+        jira_client.add_worklog(issue=issue, timeSpent=time_spent)
     elif action == 'details':
         print_issue(issue)
     # elif action == 'open':
