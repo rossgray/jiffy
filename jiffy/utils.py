@@ -31,16 +31,25 @@ def print_issue(issue: jira.Issue) -> None:
     grid.add_row("[bold magenta]URL", issue.permalink())
     grid.add_row("[bold magenta]Issue type", issue.fields.issuetype.name)
     grid.add_row("[bold magenta]Status", issue.fields.status.name)
+    # import pdb
+
+    # pdb.set_trace()
+    # if issue.fields.issuetype.subtask is False:
+    time_remaining = format_time(issue.fields.aggregatetimeestimate or 0)
+    row_title = "Total time remaining"
     if issue.fields.issuetype.subtask is False:
-        time_remaining = format_time(issue.fields.aggregatetimeestimate or 0)
-        grid.add_row(
-            "[bold magenta]Total time remaining (including subtasks)",
-            time_remaining,
-        )
-        time_spent = format_time(issue.fields.aggregatetimespent or 0)
-        grid.add_row(
-            "[bold magenta]Total time spent (including subtasks)",
-            time_spent,
-        )
+        row_title += " (including subtasks)"
+    grid.add_row(
+        f"[bold magenta]{row_title}",
+        time_remaining,
+    )
+    time_spent = format_time(issue.fields.aggregatetimespent or 0)
+    row_title = "Total time spent"
+    if issue.fields.issuetype.subtask is False:
+        row_title += " (including subtasks)"
+    grid.add_row(
+        f"[bold magenta]{row_title}",
+        time_spent,
+    )
     grid.add_row("", "")  # probably better way to add padding than this
     print(grid)
